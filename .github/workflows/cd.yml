@@ -8,6 +8,10 @@ jobs:
   Deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -19,21 +23,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run build
         run: npm run build
-
-  PushDocker:
-    name: Push Docker
-    runs-on: ubuntu-latest
-    needs: Deploy   # <- ensures this runs after Deploy
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - id: auth
         uses: google-github-actions/auth@v2
@@ -47,8 +39,7 @@ jobs:
           version: '>= 363.0.0'
 
       - name: Verify gcloud
-        run: gcloud info     
+        run: gcloud info
 
       - name: Build and push Docker image
         run: gcloud builds submit --tag us-central1-docker.pkg.dev/notely-486922/notely-ar-repo/notely:v1.1 .
-        
